@@ -1,7 +1,9 @@
 import os
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import case, text
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 DATABASE_URL = os.getenv(
@@ -10,15 +12,19 @@ DATABASE_URL = os.getenv(
 
 engine = create_engine(DATABASE_URL, echo=True)
 
+Priority = Literal["low", "medium", "high"]
+
 
 class Todo(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str
     done: bool = False
+    priority: str = Field(default="medium")
 
 
 class TodoCreate(SQLModel):
     title: str
+    priority: Priority = "medium"
 
 
 app = FastAPI(title="Todo API")
@@ -35,6 +41,16 @@ app.add_middleware(
 def on_startup():
     SQLModel.metadata.create_all(engine)
 
+    # create_all() creates missing tables, but does not add columns to
+    # tables that already exist. Keep existing workshop databases compatible.
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "ALTER TABLE todo "
+                "ADD COLUMN IF NOT EXISTS priority VARCHAR NOT NULL DEFAULT 'medium'"
+            )
+        )
+
 
 @app.get("/")
 def hello_world():
@@ -43,14 +59,22 @@ def hello_world():
 
 @app.get("/todos", response_model=list[Todo])
 def list_todos():
+    priority_order = case(
+        (Todo.priority == "high", 0),
+        (Todo.priority == "medium", 1),
+        (Todo.priority == "low", 2),
+        else_=3,
+    )
+
     with Session(engine) as session:
-        return session.exec(select(Todo)).all()
+        statement = select(Todo).order_by(priority_order, Todo.id)
+        return session.exec(statement).all()
 
 
 @app.post("/todos", response_model=Todo)
 def create_todo(todo: TodoCreate):
     with Session(engine) as session:
-        db_todo = Todo(title=todo.title)
+        db_todo = Todo(title=todo.title, priority=todo.priority)
         session.add(db_todo)
         session.commit()
         session.refresh(db_todo)
