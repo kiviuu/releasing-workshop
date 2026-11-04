@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo App</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -9,7 +10,22 @@
   <h1>Todo List</h1>
 
   <form id="todo-form">
-    <input type="text" id="todo-title" placeholder="What needs doing?" required>
+    <input
+      type="text"
+      id="todo-title"
+      placeholder="What needs doing?"
+      required
+    >
+
+    <label class="priority-field" for="todo-priority">
+      Priority
+      <select id="todo-priority" name="priority">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+    </label>
+
     <button type="submit">Add</button>
   </form>
 
