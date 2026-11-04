@@ -1,17 +1,31 @@
 body {
   font-family: sans-serif;
-  max-width: 480px;
+  max-width: 600px;
   margin: 40px auto;
+  padding: 0 16px;
 }
 
 #todo-form {
   display: flex;
+  align-items: end;
   gap: 8px;
   margin-bottom: 20px;
 }
 
 #todo-title {
   flex: 1;
+  min-width: 0;
+  padding: 8px;
+}
+
+.priority-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+#todo-priority {
   padding: 8px;
 }
 
@@ -24,15 +38,51 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #ddd;
 }
 
-#todo-list li span {
+#todo-list li .todo-title {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 #todo-list li span.done {
   text-decoration: line-through;
   color: #999;
+}
+
+.priority-label {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.priority-label-high {
+  color: #a32121;
+  background: #fde8e8;
+}
+
+.priority-label-medium {
+  color: #805b00;
+  background: #fff3cd;
+}
+
+.priority-label-low {
+  color: #28613b;
+  background: #e4f3e8;
+}
+
+@media (max-width: 520px) {
+  #todo-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #todo-form button {
+    align-self: flex-start;
+  }
 }
